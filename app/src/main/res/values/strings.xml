@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Aurora</string>
+    <string name="home">Home</string>
+    <string name="category">Category</string>
+    <string name="favorite">Favorite</string>
+    <string name="settings">Settings</string>
+    <string name="camera">Camera</string>
+    <string name="focal_length">Focal length</string>
+    <string name="iso">ISO</string>
+    <string name="shutter_speed">Shutter Speed</string>
+    <string name="dimensions">Dimensions</string>
+    <string name="location">Location</string>
+</resources>
