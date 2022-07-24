@@ -1,12 +1,18 @@
 package com.eternal.aurora.ui.page.main.home
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.eternal.aurora.logic.database.entity.PhotoData
 import com.eternal.aurora.logic.model.Photo
 import com.eternal.aurora.logic.network.Network
+import com.eternal.aurora.ui.utils.DatabaseUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -14,17 +20,32 @@ import javax.inject.Inject
 @HiltViewModel
 class HomeViewModel @Inject constructor(): ViewModel() {
 
-    private val _photoState = MutableStateFlow(emptyList<Photo>())
-    val photoState = _photoState.asStateFlow()
+    private val _photosState = MutableStateFlow(flowOf(emptyList<Photo>()))
+    val photosState = _photosState.asStateFlow()
+
+    val showAlert = mutableStateOf(false)
+
 
     init {
+        tryToGetPhotos()
+        loadPhotosFromDb()
+    }
+
+    fun tryToGetPhotos() {
         viewModelScope.launch {
-            val response = Network.getPhotos().getOrNull()
+            val result = Network.getPhotos()
+            val response = result.getOrNull()
             if(response != null) {
-                _photoState.value = response
+                response.reversed().forEach {
+                    DatabaseUtil.insertOrUpdatePhoto(it) //Reverse insertion
+                }
+            } else {
+                showAlert.value = true
             }
         }
     }
 
-
+    fun loadPhotosFromDb() {
+        _photosState.value = DatabaseUtil.loadAllPhoto()
+    }
 }

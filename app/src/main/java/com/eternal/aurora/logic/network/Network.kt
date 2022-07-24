@@ -1,5 +1,7 @@
 package com.eternal.aurora.logic.network
 
+import android.util.Log
+import com.eternal.aurora.logic.model.Photo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import retrofit2.Call
@@ -13,10 +15,14 @@ object Network {
 
     private val photoService = ServiceCreator.create<PhotoService>()
 
+    private fun handlePhoto(photo: Photo) = photo.copy(color = photo.color.removePrefix("#"))
     suspend fun getPhotos() = fire {
         val response = photoService.getPhotos().await()
         if(response != null) {
-            Result.success(response)
+            val result = response.map {
+                handlePhoto(it)
+            }
+            Result.success(result)
         } else {
             Result.failure(RuntimeException("Something went wrong when getPhotos"))
         }
@@ -28,6 +34,25 @@ object Network {
             Result.success(response)
         } else {
             Result.failure(RuntimeException("Something went wrong when getPhotoDetail"))
+        }
+    }
+
+    suspend fun getPhotoCollections() = fire {
+        val response = photoService.getPhotoCollections().await()
+        if(response != null) {
+            Result.success(response)
+        } else {
+            Result.failure(RuntimeException("Something went wrong when getPhotoCollections"))
+        }
+    }
+
+    suspend fun getPhotosFromCollection(collectionId: String) = fire {
+        val response = photoService.getPhotosFromCollection(collectionId).await()
+        if(response != null){
+            val result = response.map { handlePhoto(it) }
+            Result.success(result)
+        } else {
+            Result.failure(RuntimeException("Something went wrong when getPhotosFromCollection"))
         }
     }
 

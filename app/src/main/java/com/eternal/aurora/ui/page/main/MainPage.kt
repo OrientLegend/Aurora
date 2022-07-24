@@ -28,7 +28,7 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPagerApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun MainPage(onOpenPhoto: (String) -> Unit) {
+fun MainPage(onOpenPhoto: (String) -> Unit, onOpenCollection: (String) -> Unit) {
 
     val pagerState = rememberPagerState()
     val coroutineScope = rememberCoroutineScope()
@@ -36,7 +36,7 @@ fun MainPage(onOpenPhoto: (String) -> Unit) {
     val pageList =
         listOf<@Composable () -> Unit>(
             { HomePage(onOpenPhoto = onOpenPhoto) },
-            { CategoryPage() },
+            { CategoryPage(onOpenCollection = onOpenCollection) },
             { FavoritePage() },
             { SettingsPage() })
 

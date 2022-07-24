@@ -3,6 +3,9 @@ package com.eternal.aurora.ui.page.photo
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyGridScope
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Exposure
@@ -19,6 +22,7 @@ import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -32,7 +36,6 @@ import com.eternal.aurora.logic.model.PhotoLocation
 import com.google.gson.Gson
 import com.eternal.aurora.ui.animation.LoadingAnimation
 import com.eternal.aurora.ui.component.BottomDrawer
-import com.eternal.aurora.ui.page.main.home.UserWithImage
 import com.eternal.aurora.ui.theme.AuroraTheme
 import com.eternal.aurora.ui.utils.saveToAlbum
 import com.eternal.aurora.ui.utils.urlToBitmap
@@ -143,7 +146,8 @@ private fun BottomSheetDialog(
                     onClick = {
                         coroutineScope.launch(Dispatchers.IO) {
                             val url = URL(photo.urls.regular)
-                            url.urlToBitmap()?.saveToAlbum(App.context, "test.jpg")
+                            val defaultFileName = photo.id
+                            url.urlToBitmap()?.saveToAlbum(App.context, "$defaultFileName.jpg")
                         }
                     },
                     modifier = Modifier.constrainAs(iconFileDownload) {
@@ -157,8 +161,6 @@ private fun BottomSheetDialog(
                         tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
-
-
             }
 
             Divider(
@@ -166,40 +168,41 @@ private fun BottomSheetDialog(
                 modifier = Modifier.padding(vertical = 10.dp)
             )
 
-            FlowRow {
+
+            LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 150.dp)) {
                 val photoDetail = photoDetailState.value
                 val exif = photoDetail?.exif
                 val location = photoDetail?.location
-                Introduction(
-                    name = stringResource(id = R.string.camera),
+                introduction(
+                    nameId = R.string.camera,
                     description = exif?.name,
                     imageVector = Icons.Outlined.PhotoCamera,
                     modifier = Modifier.padding(bottom = 12.dp, end = 12.dp)
                 )
-                Introduction(
-                    name = stringResource(id = R.string.focal_length),
+                introduction(
+                    nameId = R.string.focal_length,
                     description = if (exif?.focalLength != null) exif.focalLength.toString() else null,
                     supplement = "mm",
                     imageVector = Icons.Outlined.Visibility,
                 )
-                Introduction(
-                    name = stringResource(id = R.string.shutter_speed),
+                introduction(
+                    nameId = R.string.shutter_speed,
                     description = exif?.exposureTime,
                     supplement = "s",
                     imageVector = Icons.Filled.Exposure
                 )
-                Introduction(
-                    name = stringResource(id = R.string.iso),
+                introduction(
+                    nameId = R.string.iso,
                     description = exif?.iso,
                     imageVector = Icons.Filled.Iso
                 )
-                Introduction(
-                    name = stringResource(id = R.string.dimensions),
+                introduction(
+                    nameId = R.string.dimensions,
                     description = "${photo.width.toInt()}×${photo.height.toInt()}",
                     imageVector = Icons.Outlined.PhotoSizeSelectActual
                 )
-                Introduction(
-                    name = stringResource(id = R.string.location),
+                introduction(
+                    nameId = R.string.location,
                     description = getLocationDescription(location),
                     imageVector = Icons.Outlined.Place
                 )
@@ -208,33 +211,36 @@ private fun BottomSheetDialog(
     })
 }
 
-@Composable
-private fun Introduction(
+private fun LazyGridScope.introduction(
     modifier: Modifier = Modifier,
-    name: String,
+    nameId: Int,
     description: String?,
     supplement: String = "",
     imageVector: ImageVector,
 ) {
     if (description != null) { //If description is null, then it's unnecessary to show
-        Row(modifier = modifier.padding(6.dp)) {
-            Icon(
-                imageVector = imageVector,
-                contentDescription = name,
-                modifier = Modifier.align(Alignment.CenterVertically)
-            )
-            Column(modifier = Modifier.padding(start = 12.dp)) {
-                Text(
-                    text = name,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+        item{
+            Row(modifier = modifier.padding(6.dp)/*.aspectRatio(2.5f)*/) {
+                Icon(
+                    imageVector = imageVector,
+                    contentDescription = stringResource(id = nameId),
+                    modifier = Modifier.align(Alignment.CenterVertically),
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
                 )
-                Text(
-                    text = "${description}$supplement",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1
-                )
+                Column(modifier = Modifier.padding(start = 12.dp)) {
+                    Text(
+                        text = stringResource(id = nameId),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
+                    Text(
+                        text = "${description}$supplement",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
         }
     }

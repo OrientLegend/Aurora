@@ -7,7 +7,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object ServiceCreator {
 
-    private const val ACCESS_KEY = Key.ACCESS_KEY
+    private const val ACCESS_KEY = Key.ACCESS_KEY //You can get your key on https://unsplash.com/
 
     private const val BASE_URL = "https://api.unsplash.com"
 

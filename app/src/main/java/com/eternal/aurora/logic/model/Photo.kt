@@ -1,18 +1,47 @@
 package com.eternal.aurora.logic.model
 
 import android.os.Build
+import androidx.room.Embedded
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
-
+@Entity
 data class Photo(
-    val id: String,
+    @PrimaryKey val id: String,
     val width: Float,
     val height: Float,
-    val urls: Urls,
+    val color: String,
+    @Embedded val urls: Urls,
     val likes: Int = 0,
-    val user: UserInfo
+    @Embedded val user: UserInfo
+)
+
+
+data class Urls(
+    val raw: String = "",
+    val regular: String = "",
+    val full: String = "",
+    val small: String = "",
+    val thumb: String = ""
+)
+
+data class UserInfo(
+    @SerializedName("id") val userId: String,
+    val name: String,
+    @SerializedName("portfolio_url") val portfolioUrl: String?,
+    val bio: String? = "",
+    @Embedded @SerializedName("profile_image") val profileImage: ProfileImage,
+    @SerializedName("total_like") val totalLike: Int,
+    @SerializedName("total_photos") val totalPhotos: Int
+)
+
+data class ProfileImage(
+    @SerializedName("small") val smallScale: String = "",
+    @SerializedName("medium") val mediumScale: String = "",
+    @SerializedName("large") val largeScale: String = ""
 )
 
 fun Photo.encodeUrlsToUtf8() = this.copy(
@@ -43,49 +72,30 @@ private fun Urls.encodeUrlsToUtf8(): Urls {
 private fun ProfileImage.encodeUrlsToUtf8() =
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         this.copy(
-            small = URLEncoder.encode(this.small, StandardCharsets.UTF_8),
-            medium = URLEncoder.encode(this.medium, StandardCharsets.UTF_8),
-            large = URLEncoder.encode(this.large, StandardCharsets.UTF_8)
+            smallScale = URLEncoder.encode(this.smallScale, StandardCharsets.UTF_8),
+            mediumScale = URLEncoder.encode(this.mediumScale, StandardCharsets.UTF_8),
+            largeScale = URLEncoder.encode(this.largeScale, StandardCharsets.UTF_8)
         )
     } else {
         this.copy(
-            small = URLEncoder.encode(this.small, "UTF-8"),
-            medium = URLEncoder.encode(this.medium, "UTF-8"),
-            large = URLEncoder.encode(this.large, "UTF-8")
+            smallScale = URLEncoder.encode(this.smallScale, "UTF-8"),
+            mediumScale = URLEncoder.encode(this.mediumScale, "UTF-8"),
+            largeScale = URLEncoder.encode(this.largeScale, "UTF-8")
         )
     }
 
-private fun UserInfo.encodeUrlsToUtf8() = if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-    this.copy(
-        bio = URLEncoder.encode(this.bio ?: "", StandardCharsets.UTF_8),
-        portfolioUrl = URLEncoder.encode(this.portfolioUrl ?: "", StandardCharsets.UTF_8),
-        profileImage = profileImage.encodeUrlsToUtf8()
-    )
-} else {
-    this.copy(
-        bio = URLEncoder.encode(this.bio ?: "", "UTF-8"),
-        portfolioUrl = URLEncoder.encode(this.portfolioUrl ?: "", "UTF-8"),
-        profileImage = profileImage.encodeUrlsToUtf8()
-    )
-}
+private fun UserInfo.encodeUrlsToUtf8() =
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        this.copy(
+            bio = URLEncoder.encode(this.bio ?: "", StandardCharsets.UTF_8),
+            portfolioUrl = URLEncoder.encode(this.portfolioUrl ?: "", StandardCharsets.UTF_8),
+            profileImage = profileImage.encodeUrlsToUtf8()
+        )
+    } else {
+        this.copy(
+            bio = URLEncoder.encode(this.bio ?: "", "UTF-8"),
+            portfolioUrl = URLEncoder.encode(this.portfolioUrl ?: "", "UTF-8"),
+            profileImage = profileImage.encodeUrlsToUtf8()
+        )
+    }
 
-
-data class Urls(
-    val raw: String = "",
-    val regular: String = "",
-    val full: String = "",
-    val small: String = "",
-    val thumb: String = ""
-)
-
-data class UserInfo(
-    val id: String,
-    val name: String,
-    @SerializedName("portfolio_url") val portfolioUrl: String?,
-    val bio: String? = "",
-    @SerializedName("profile_image") val profileImage: ProfileImage,
-    @SerializedName("total_like") val totalLike: Int,
-    @SerializedName("total_photos") val totalPhotos: Int
-)
-
-data class ProfileImage(val small: String = "", val medium: String = "", val large: String = "")

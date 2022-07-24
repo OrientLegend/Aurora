@@ -10,4 +10,6 @@
     <string name="shutter_speed">Shutter Speed</string>
     <string name="dimensions">Dimensions</string>
     <string name="location">Location</string>
+    <string name="photos_number">%d photos</string>
+    <string name="network_error_tip">Poor network environment</string>
 </resources>
