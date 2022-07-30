@@ -139,7 +139,6 @@ private val tabs =
         TabItem(Icons.Filled.Home, R.string.home),
         TabItem(Icons.Filled.Category, R.string.category),
         TabItem(Icons.Filled.Favorite, R.string.favorite),
-        TabItem(Icons.Filled.Settings, R.string.settings)
     )
 
 

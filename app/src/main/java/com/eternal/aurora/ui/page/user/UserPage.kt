@@ -119,7 +119,10 @@ fun UserPage(
                                     else viewModel.addFollowingUser(userDetail!!)
                                 },
                                 modifier = Modifier.statusBarsPadding(),
-                                contentPadding = PaddingValues(0.dp)
+                                contentPadding = PaddingValues(0.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+                                )
                             ) {
                                 Text(
                                     text = if (isFollowing) stringResource(id = R.string.following)

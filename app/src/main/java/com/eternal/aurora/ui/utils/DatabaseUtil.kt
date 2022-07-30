@@ -104,7 +104,10 @@ object DatabaseUtil {
         }
     }
 
-    suspend fun deleteFollowingUser(username: String) = followingUserDao.deleteByUsername(username)
+    suspend fun deleteFollowingUser(username: String) {
+        followingUserDao.deleteByUsername(username)
+        userDao.deleteByUsername(username)
+    }
 
     fun loadAllFollowingUsername() = followingUserDao.loadAll()
 
