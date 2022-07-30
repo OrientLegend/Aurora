@@ -1,4 +1,4 @@
-package com.eternal.aurora.logic.database.dao
+package com.eternal.aurora.logic.database.dao.photo
 
 import androidx.room.Dao
 import androidx.room.Insert

@@ -7,6 +7,7 @@ import com.eternal.aurora.logic.database.entity.FavoritePhotoId
 import com.eternal.aurora.logic.database.entity.FollowingUsername
 import com.eternal.aurora.logic.database.entity.HomePhotoId
 import com.eternal.aurora.logic.model.Photo
+import com.eternal.aurora.logic.model.UserDetail
 
 object DatabaseUtil {
 
@@ -21,6 +22,7 @@ object DatabaseUtil {
     private val photoDao = db.photoDao()
     private val homePhotoDao = db.homePhotoDao()
     private val favoritePhotoDao = db.favoritePhotoDao()
+    private val userDao = db.userDao()
     private val followingUserDao = db.followingUserDao()
 
 
@@ -88,20 +90,28 @@ object DatabaseUtil {
 
 
     //Following user
-    private suspend fun insertFollowingUser(followingUser: FollowingUsername) {
-        followingUserDao.insert(followingUser)
+    private suspend fun insertFollowingUser(userDetail: UserDetail) {
+        followingUserDao.insert(FollowingUsername(userDetail.username))
+        userDao.insert(userDetail)
     }
 
-    private suspend fun updateFollowingUser(followingUser: FollowingUsername) =
-        followingUserDao.update(followingUser)
+    private suspend fun updateFollowingUser(userDetail: UserDetail) =
+        followingUserDao.update(FollowingUsername(userDetail.username))
 
-    suspend fun insertOrUpdateFollowingUser(followingUser: FollowingUsername) {
-        if (updateFollowingUser(followingUser) == 0) {
-            insertFollowingUser(followingUser)
+    suspend fun insertOrUpdateFollowingUser(userDetail: UserDetail) {
+        if (updateFollowingUser(userDetail) == 0) {
+            insertFollowingUser(userDetail)
         }
     }
 
     suspend fun deleteFollowingUser(username: String) = followingUserDao.deleteByUsername(username)
 
-    fun loadAllFollowingUser() = followingUserDao.loadAll()
+    fun loadAllFollowingUsername() = followingUserDao.loadAll()
+
+    fun loadAllFollowingUser() = followingUserDao.loadAllFollowingUsers()
+
+    //User
+    private suspend fun insertUser(userDetail: UserDetail) = userDao.insert(userDetail)
+
+    private suspend fun deleteUser(username: String) = userDao.deleteByUsername(username)
 }

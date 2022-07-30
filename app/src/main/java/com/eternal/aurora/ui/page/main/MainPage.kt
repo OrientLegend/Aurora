@@ -51,8 +51,7 @@ fun MainPage(
                 )
             },
             { CategoryPage(onOpenCollection = onOpenCollection, onOpenTopic = onOpenTopic) },
-            { FavoritePage(openPhoto = onOpenPhoto) },
-            { SettingsPage() })
+            { FavoritePage(openPhoto = onOpenPhoto, openUser = openUser) })
 
     AuroraTheme {
         Scaffold(

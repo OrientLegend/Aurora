@@ -3,6 +3,7 @@ package com.eternal.aurora.ui.page.main.favorite
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.eternal.aurora.logic.model.Photo
+import com.eternal.aurora.logic.model.UserDetail
 import com.eternal.aurora.ui.utils.DatabaseUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,9 +19,13 @@ class FavoriteViewModel @Inject constructor(): ViewModel(){
     private val _favoritePhotosState = MutableStateFlow(flowOf(emptyList<Photo>()))
     val favoritePhotosState = _favoritePhotosState.asStateFlow()
 
+    private val _followingUsersState = MutableStateFlow(flowOf(emptyList<UserDetail>()))
+    val followingUserState = _followingUsersState.asStateFlow()
+
     init {
         viewModelScope.launch {
             _favoritePhotosState.value = DatabaseUtil.loadAllFavoritePhotos()
+            _followingUsersState.value = DatabaseUtil.loadAllFollowingUser()
         }
     }
 

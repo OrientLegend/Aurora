@@ -49,6 +49,7 @@ fun UserPage(
     val userPhotos by viewModel.userPhotosState.collectAsState()
     val userCollections by viewModel.userCollectionsState.collectAsState()
     val userLikes by viewModel.userLikesState.collectAsState()
+    val isFollowing by viewModel.isFollowing.collectAsState().value.collectAsState(initial = false)
 
     AuroraTheme {
         if (userDetail != null) {
@@ -112,12 +113,18 @@ fun UserPage(
                             }
                         },
                         actions = {
-                            TextButton(
-                                onClick = { /*TODO*/ },
+                            Button(
+                                onClick = {
+                                    if (isFollowing) viewModel.removeFollowingUser(userDetail!!)
+                                    else viewModel.addFollowingUser(userDetail!!)
+                                },
                                 modifier = Modifier.statusBarsPadding(),
                                 contentPadding = PaddingValues(0.dp)
                             ) {
-                                Text(text = stringResource(id = R.string.follow))
+                                Text(
+                                    text = if (isFollowing) stringResource(id = R.string.following)
+                                    else stringResource(id = R.string.follow)
+                                )
                             }
                         },
                         scrollBehavior = scrollBehavior
