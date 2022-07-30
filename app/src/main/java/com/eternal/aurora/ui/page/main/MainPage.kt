@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -15,6 +16,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.constraintlayout.compose.ConstraintLayout
 import com.eternal.aurora.R
 import com.eternal.aurora.ui.page.main.category.CategoryPage
 import com.eternal.aurora.ui.page.main.favorite.FavoritePage
@@ -28,23 +30,35 @@ import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPagerApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun MainPage(onOpenPhoto: (String) -> Unit, onOpenCollection: (String) -> Unit) {
+fun MainPage(
+    onOpenPhoto: (String) -> Unit,
+    onOpenCollection: (String, String, Int) -> Unit,
+    onOpenTopic: (String, String, Int) -> Unit,
+    openSearchPage: () -> Unit,
+    openUser: (String) -> Unit
+) {
 
     val pagerState = rememberPagerState()
     val coroutineScope = rememberCoroutineScope()
 
     val pageList =
         listOf<@Composable () -> Unit>(
-            { HomePage(onOpenPhoto = onOpenPhoto) },
-            { CategoryPage(onOpenCollection = onOpenCollection) },
-            { FavoritePage() },
+            {
+                HomePage(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    onOpenPhoto = onOpenPhoto,
+                    openUser = openUser
+                )
+            },
+            { CategoryPage(onOpenCollection = onOpenCollection, onOpenTopic = onOpenTopic) },
+            { FavoritePage(openPhoto = onOpenPhoto) },
             { SettingsPage() })
 
     AuroraTheme {
         Scaffold(
             modifier = Modifier
                 .navigationBarsPadding(),
-            topBar = { TopBar() },
+            topBar = { TopBar(openSearchPage) },
             bottomBar = {
                 NavigationBar {
                     tabs.forEachIndexed { index, tabItem ->
@@ -71,8 +85,9 @@ fun MainPage(onOpenPhoto: (String) -> Unit, onOpenCollection: (String) -> Unit) 
                 count = pageList.size,
                 state = pagerState,
                 modifier = Modifier
-                    .padding(innerPadding)
-                    .padding(horizontal = 16.dp)
+                    .fillMaxWidth()
+                    .padding(innerPadding),
+                userScrollEnabled = false
             ) { page ->
                 pageList[page]()
             }
@@ -82,26 +97,40 @@ fun MainPage(onOpenPhoto: (String) -> Unit, onOpenCollection: (String) -> Unit) 
 }
 
 @Composable
-private fun TopBar() {
-    Row(
+private fun TopBar(openSearchPage: () -> Unit) {
+    ConstraintLayout(
         modifier = Modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
             .statusBarsPadding()
-            .padding(horizontal = 16.dp)
     ) {
+        val (logo, appName, iconSearch) = createRefs()
         Image(
             painter = painterResource(id = R.drawable.ic_launcher_foreground),
             contentDescription = null,
-            modifier = Modifier.size(48.dp)
+            modifier = Modifier.constrainAs(logo) {
+                start.linkTo(parent.start, 16.dp)
+                top.linkTo(parent.top)
+                bottom.linkTo(parent.bottom)
+            }.size(48.dp)
         )
         Text(
             text = stringResource(id = R.string.app_name),
             style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier
-                .padding(start = 12.dp)
-                .align(Alignment.CenterVertically)
+            modifier = Modifier.constrainAs(appName) {
+                start.linkTo(logo.end, 12.dp)
+                top.linkTo(parent.top)
+                bottom.linkTo(parent.bottom)
+            }
         )
+
+        IconButton(onClick = { openSearchPage() }, modifier = Modifier.constrainAs(iconSearch) {
+            end.linkTo(parent.end, 16.dp)
+            top.linkTo(parent.top)
+            bottom.linkTo(parent.bottom)
+        }) {
+            Icon(imageVector = Icons.Outlined.Search, contentDescription = null)
+        }
     }
 }
 

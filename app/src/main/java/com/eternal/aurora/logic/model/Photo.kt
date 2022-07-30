@@ -8,6 +8,9 @@ import com.google.gson.annotations.SerializedName
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
+
+
+
 @Entity
 data class Photo(
     @PrimaryKey val id: String,
@@ -31,12 +34,14 @@ data class Urls(
 data class UserInfo(
     @SerializedName("id") val userId: String,
     val name: String,
+    val username: String,
+    val bio: String?,
     @SerializedName("portfolio_url") val portfolioUrl: String?,
-    val bio: String? = "",
     @Embedded @SerializedName("profile_image") val profileImage: ProfileImage,
     @SerializedName("total_like") val totalLike: Int,
     @SerializedName("total_photos") val totalPhotos: Int
 )
+
 
 data class ProfileImage(
     @SerializedName("small") val smallScale: String = "",

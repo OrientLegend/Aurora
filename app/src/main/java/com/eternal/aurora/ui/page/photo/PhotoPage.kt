@@ -1,5 +1,6 @@
 package com.eternal.aurora.ui.page.photo
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -21,6 +22,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -47,9 +49,12 @@ import java.net.URL
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun PhotoPage(photoJson: String, photoViewModel: PhotoViewModel = hiltViewModel()) {
+fun PhotoPage(
+    photoJson: String,
+    photoViewModel: PhotoViewModel = hiltViewModel(),
+    openUser: (String) -> Unit
+) {
     val photo = Gson().fromJson(photoJson, Photo::class.java)
-
     photoViewModel.getPhotoDetail(photo.id)
 
     val photoDetailState = photoViewModel.photoDetailState.collectAsState()
@@ -98,8 +103,8 @@ fun PhotoPage(photoJson: String, photoViewModel: PhotoViewModel = hiltViewModel(
             BottomSheetDialog(
                 photo = photo,
                 drawerState = drawerState,
-                photoDetailState = photoDetailState,
-                coroutineScope = coroutineScope
+                coroutineScope = coroutineScope,
+                openUser = openUser
             )
         }
     }
@@ -113,9 +118,12 @@ private fun BottomSheetDialog(
     drawerState: ModalBottomSheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden
     ),
-    photoDetailState: State<PhotoDetail?>,
-    coroutineScope: CoroutineScope
+    viewModel: PhotoViewModel = hiltViewModel(),
+    coroutineScope: CoroutineScope,
+    openUser: (String) -> Unit
 ) {
+    val photoDetailState = viewModel.photoDetailState.collectAsState()
+    val isFavorite by viewModel.isFavorite.collectAsState().value.collectAsState(initial = false)
     BottomDrawer(modifier = modifier, drawerState = drawerState, sheetContent = {
         Column(
             modifier = Modifier
@@ -130,17 +138,25 @@ private fun BottomSheetDialog(
                     start.linkTo(parent.start)
                     top.linkTo(parent.top)
                     bottom.linkTo(parent.bottom)
-                })
+                }, openUser = openUser)
 
-                Icon(
-                    imageVector = Icons.Outlined.FavoriteBorder,
-                    contentDescription = null,
+                IconButton(
+                    onClick = {
+                        if (isFavorite) viewModel.removeFavoritePhoto(photo)
+                        else viewModel.addFavoritePhoto(photo)
+                    },
                     modifier = Modifier.constrainAs(iconFavorite) {
                         end.linkTo(parent.end)
                         top.linkTo(parent.top)
                         bottom.linkTo(parent.bottom)
-                    }, tint = MaterialTheme.colorScheme.onSurface
-                )
+                    },
+                ) {
+                    Icon(
+                        imageVector = if (isFavorite) Icons.Outlined.Favorite else Icons.Outlined.FavoriteBorder,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurface
+                    )
+                }
 
                 IconButton(
                     onClick = {
@@ -167,7 +183,6 @@ private fun BottomSheetDialog(
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
                 modifier = Modifier.padding(vertical = 10.dp)
             )
-
 
             LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 150.dp)) {
                 val photoDetail = photoDetailState.value
@@ -219,7 +234,7 @@ private fun LazyGridScope.introduction(
     imageVector: ImageVector,
 ) {
     if (description != null) { //If description is null, then it's unnecessary to show
-        item{
+        item {
             Row(modifier = modifier.padding(6.dp)/*.aspectRatio(2.5f)*/) {
                 Icon(
                     imageVector = imageVector,

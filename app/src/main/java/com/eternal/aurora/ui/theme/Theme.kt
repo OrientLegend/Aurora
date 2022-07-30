@@ -37,7 +37,7 @@ private val LightColorScheme = lightColorScheme(
 fun AuroraTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = false,
+    dynamicColor: Boolean = true,
     statusBarColor: Color = Color.Transparent,
     statusBarDarkIcon: Boolean = !darkTheme,
     content: @Composable () -> Unit,
